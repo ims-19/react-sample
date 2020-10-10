@@ -5,8 +5,9 @@ pipeline {
     agent none
 
     environment {
-        registry = 'ims-19/ims-19'
+        registry = 'ims19/secure_devops'
         dockerImage = ''
+        registryCredentials = 'docker-hub'
         CI = 'true' 
     }
     stages {
@@ -38,11 +39,19 @@ pipeline {
             }
         }
         stage('Build image') {
-            agent any
             steps {
-                sh 'echo hallo'
                 script {
                     dockerImage = docker.build(registry + ":$BUILD_NUMBER")
+                }
+            }
+        }
+        stage('Publish image') {
+            steps {
+                script {
+                    docker.withRegistry('', registryCredentials) {
+                        dockerImage.push()
+                        dockerImage.push("latest")
+                    }
                 }
             }
         }
