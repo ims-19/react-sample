@@ -1,15 +1,22 @@
+// working example, as configured in the pipeline settings of the project
+
 pipeline {
+
+    agent none
 
     environment {
         registry = 'ims-19/ims-19'
         dockerImage = ''
-    }
-
-    agent none
-    environment {
         CI = 'true' 
     }
     stages {
+        
+        stage('Clone') {
+            agent any
+            steps {
+                git 'https://github.com/ims-19/react-sample.git'
+            }
+        } 
         stage('Build') {
             agent {
                 docker {
@@ -31,7 +38,13 @@ pipeline {
             }
         }
         stage('Build image') {
-            dockerImage = docker.build registry + ":$BUILD_NUMBER"
+            agent any
+            steps {
+                sh 'echo hallo'
+                script {
+                    dockerImage = docker.build(registry + ":$BUILD_NUMBER")
+                }
+            }
         }
     }
 }
